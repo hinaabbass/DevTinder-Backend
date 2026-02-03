@@ -1,39 +1,35 @@
+const connectDB = require("./config/database");
 const express = require("express");
+const User = require("./models/user");
 
 const app = express();
 const port = 7777;
 
-app.get("/user", (req, res) => {
-  res.send({ firstname: "Hina", lastname: "Abbas" });
+app.get("/", (req, res) => {
+  res.send("Welcome to DevTinder Backend");
 });
 
-app.post("/user", (req, res) => {
-  res.send("POST request to the /user endpoint");
+app.post("/signup", async (req, res) => {
+  // Creating a new instance of User model
+  const user = new User({
+    firstName: "Hina",
+    lastName: "Abbas",
+    email: "hina.abbas@gmail.com",
+    password: "hina123",
+  });
+  try {
+    await user.save();
+    res.send("User created successfully");
+  } catch (err) {
+    res.status(500).send(`Error creating user: ${err.message}`);
+  }
 });
 
-app.put("/user", (req, res) => {
-  res.send("PUT request to the /user endpoint");
-});
-
-app.delete("/user", (req, res) => {
-  res.send("DELETE request to the /user endpoint");
-});
-
-app.patch("/user", (req, res) => {
-  res.send("PATCH request to the /user endpoint");
-});
-
-app.use("/hello", (req, res) => {
-  res.send("Hello World!");
-});
-
-app.use("/test", (req, res) => {
-  res.send("This is a test endpoint");
-});
-app.use("/", (req, res) => {
-  res.send("Welcome to DevTinder APP");
-});
-
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+connectDB()
+  .then(() => {
+    console.log("Database connected successfully");
+    app.listen(port, () => {
+      console.log(`Server is running on http://localhost:${port}`);
+    });
+  })
+  .catch((err) => console.error("Database connection error:", err));

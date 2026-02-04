@@ -28,12 +28,23 @@ app.delete("/users", async (req, res) => {
     res.status(500).send(`Error deleting users: ${err.message}`);
   }
 });
-
-app.patch("/users", async (req, res) => {
-  const userId = req.body.userId;
+// Route to update a user by ID
+app.patch("/users/:userId", async (req, res) => {
+  const userId = req.params?.userId;
   const data = req.body;
 
   try {
+    // api level validation to only allow certain fields to be updated
+    const allowedUpdates = ["photourl", "about", "skills", "password", "age"];
+
+    const isUpdateAllowed = Object.keys(data).every((update) =>
+      allowedUpdates.includes(update),
+    );
+
+    if (!isUpdateAllowed) {
+      return res.status(400).send("Invalid update fields");
+    }
+
     const user = await User.findByIdAndUpdate(userId, data, {
       runValidators: true,
     });
@@ -42,7 +53,7 @@ app.patch("/users", async (req, res) => {
     res.status(500).send(`Error updating user: ${err.message}`);
   }
 });
-
+// route to create a new user
 app.post("/signup", async (req, res) => {
   // Creating a new instance of User model
   const user = new User(req.body);

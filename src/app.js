@@ -5,18 +5,12 @@ const User = require("./models/user");
 const app = express();
 const port = 7777;
 
-app.get("/", (req, res) => {
-  res.send("Welcome to DevTinder Backend");
-});
+// Middleware to parse JSON bodies
+app.use(express.json());
 
 app.post("/signup", async (req, res) => {
   // Creating a new instance of User model
-  const user = new User({
-    firstName: "Hina",
-    lastName: "Abbas",
-    email: "hina.abbas@gmail.com",
-    password: "hina123",
-  });
+  const user = new User(req.body);
   try {
     await user.save();
     res.send("User created successfully");

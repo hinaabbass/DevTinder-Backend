@@ -5,6 +5,9 @@ const User = require("./models/user");
 const app = express();
 const port = 7777;
 
+// Middleware to parse JSON bodies
+app.use(express.json());
+
 // Route to get all users
 app.get("/users", async (req, res) => {
   const users = await User.find();
@@ -14,9 +17,29 @@ app.get("/users", async (req, res) => {
     res.status(500).send(`Error fetching users: ${err.message}`);
   }
 });
+// Route to delete a user by ID
+app.delete("/users", async (req, res) => {
+  const userId = req.body.userId;
 
-// Middleware to parse JSON bodies
-app.use(express.json());
+  try {
+    const user = await User.findByIdAndDelete(userId);
+    res.send(`Deleted user with ID: ${userId}`);
+  } catch (err) {
+    res.status(500).send(`Error deleting users: ${err.message}`);
+  }
+});
+
+app.patch("/users", async (req, res) => {
+  const userId = req.body.userId;
+  const data = req.body;
+
+  try {
+    const user = await User.findByIdAndUpdate(userId, data);
+    res.send("User updated successfully");
+  } catch (err) {
+    res.status(500).send(`Error updating user: ${err.message}`);
+  }
+});
 
 app.post("/signup", async (req, res) => {
   // Creating a new instance of User model

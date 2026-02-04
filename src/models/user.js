@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const validator = require("validator");
 
 const userSchema = new Schema(
   {
@@ -24,17 +25,31 @@ const userSchema = new Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      match: [
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-        "Please provide a valid email address",
-      ],
+      validate: {
+        validator: function (value) {
+          return validator.isEmail(value);
+        },
+        message: "Please provide a valid email address",
+      },
+      index: true,
     },
 
     password: {
       type: String,
       required: [true, "Password is required"],
-      minlength: [8, "Password must be at least 8 characters long"],
       select: false, // prevents password from being returned in queries
+      validate: {
+        validator: function (value) {
+          return validator.isStrongPassword(value, {
+            minLength: 8,
+            minLowercase: 1,
+            minNumbers: 1,
+            minSymbols: 1,
+          });
+        },
+        message:
+          "Password must be at least 8 characters long and include uppercase, lowercase, number, and symbol",
+      },
     },
 
     age: {
@@ -53,10 +68,15 @@ const userSchema = new Schema(
     photourl: {
       type: String,
       trim: true,
-      match: [
-        /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))$/i,
-        "Photo URL must be a valid image URL",
-      ],
+      validate: {
+        validator: function (value) {
+          return validator.isURL(value, {
+            protocols: ["http", "https"],
+            require_protocol: true,
+          });
+        },
+        message: "Please provide a valid profile image URL",
+      },
     },
 
     about: {

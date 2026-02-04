@@ -5,6 +5,16 @@ const User = require("./models/user");
 const app = express();
 const port = 7777;
 
+// Route to get all users
+app.get("/users", async (req, res) => {
+  const users = await User.find();
+  try {
+    res.json(users);
+  } catch (err) {
+    res.status(500).send(`Error fetching users: ${err.message}`);
+  }
+});
+
 // Middleware to parse JSON bodies
 app.use(express.json());
 

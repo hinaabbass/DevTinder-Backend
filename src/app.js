@@ -1,6 +1,7 @@
 const connectDB = require("./config/database");
 const express = require("express");
 const User = require("./models/user");
+const bcrypt = require("bcrypt");
 
 const app = express();
 const port = 7777;
@@ -53,10 +54,20 @@ app.patch("/users/:userId", async (req, res) => {
     res.status(500).send(`Error updating user: ${err.message}`);
   }
 });
+
 // route to create a new user
 app.post("/signup", async (req, res) => {
+  const { firstName, lastName, email, password } = req.body;
+  // encrypting password before saving to database
+  const passwordHash = await bcrypt.hash(password, 10);
+
   // Creating a new instance of User model
-  const user = new User(req.body);
+  const user = new User({
+    firstName,
+    lastName,
+    email,
+    password: passwordHash,
+  });
   try {
     await user.save();
     res.send("User created successfully");
